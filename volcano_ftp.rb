@@ -1,12 +1,28 @@
 #!/usr/bin/env ruby
 require "socket"
 include Socket::Constants
+require "date"
+require 'yaml'
 
-# Volcano FTP contants
-BINARY_MODE = 0
-ASCII_MODE = 1
-MIN_PORT = 1025
-MAX_PORT = 65534
+def serverConf 
+  File.open('volcano.conf') do |input|
+    YAML.load_document(input) do |conf|
+      # Volcano FTP contants
+      IP = conf('ip') 
+      PORT = conf('port')
+      PATH = conf('path') 
+      LOGMOD = conf('log_on')
+      LOGERR = conf('log_file_error')
+      LOG = conf('log_history') 
+      #Transfert Parameters
+      ASCII_MODE = conf['ASCII_MODE']
+      BINARY_MODE = conf['BINARY_MODE']
+      MIN_PORT = conf['MIN_PORT']
+      MAX_PORT = conf['MAX_PORT']
+    end
+  end
+end
+
 
 # Volcano FTP class
 class VolcanoFtp
@@ -14,7 +30,6 @@ class VolcanoFtp
     # Prepare instance
     @socket = TCPServer.new(ip, port)
     @socket.listen(42)
-
     @pids = []
     @transfert_type = BINARY_MODE
     @tsocket = nil
